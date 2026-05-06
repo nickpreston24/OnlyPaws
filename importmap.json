@@ -1,0 +1,131 @@
+{
+  "scripts": [
+    {
+      "src": "/vendor/htmx/htmx.min.js",
+      "cdn": "https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js",
+      "defer": false,
+      "name": "htmx",
+      "enabled": true
+    },
+    {
+      "name": "alpinejs",
+      "src": "/vendor/alpinejs/cdn.min.js",
+      "cdn": "https://cdn.jsdelivr.net/npm/alpinejs@3.15.3/dist/cdn.min.js",
+      "repo": "https://github.com/alpinejs/alpine",
+      "defer": true,
+      "enabled": true
+    },
+    {
+      "name": "alpinejs-module",
+      "src": "/vendor/alpinejs/module.esm.min.js",
+      "cdn": "https://cdn.jsdelivr.net/npm/alpinejs@3.15.3/dist/module.esm.min.js",
+      "repo": "https://github.com/alpinejs/alpine",
+      "defer": true,
+      "enabled": false
+    },
+    {
+      "name": "alpine-collapse",
+      "src": "/vendor/alpinejs-collapse/cdn.min.js",
+      "cdn": "https://cdnjs.cloudflare.com/ajax/libs/alpinejs-collapse/3.15.0/cdn.min.js",
+      "repo": "https://github.com/alpinejs/collapse",
+      "defer": true,
+      "enabled": false
+    },
+    {
+      "name": "alpine-collapse-module",
+      "src": "/vendor/alpinejs-collapse/module.esm.min.js",
+      "cdn": "https://cdnjs.cloudflare.com/ajax/libs/alpinejs-collapse/3.15.0/module.esm.min.js",
+      "repo": "https://github.com/alpinejs/collapse",
+      "defer": true,
+      "enabled": false
+    },
+    {
+      "name": "alpine-persist",
+      "src": "/vendor/alpinejs-persist/cdn.min.js",
+      "cdn": "https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js",
+      "repo": "https://github.com/alpinejs/persist",
+      "defer": true,
+      "enabled": false
+    },
+    {
+      "name": "alpine-persist-module",
+      "src": "/vendor/alpinejs-persist/module.esm.min.js",
+      "cdn": "https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/module.esm.min.js",
+      "repo": "https://github.com/alpinejs/persist",
+      "defer": true,
+      "enabled": false
+    },
+    {
+      "name": "alpine-focus",
+      "src": "/vendor/alpinejs-focus/cdn.min.js",
+      "cdn": "https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.x.x/dist/cdn.min.js",
+      "repo": "https://github.com/alpinejs/focus",
+      "defer": true,
+      "enabled": false
+    },
+    {
+      "name": "alpine-focus-module",
+      "src": "/vendor/alpinejs-focus/module.esm.min.js",
+      "cdn": "https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.x.x/dist/module.esm.min.js",
+      "repo": "https://github.com/alpinejs/focus",
+      "defer": true,
+      "enabled": false
+    },
+    {
+      "name": "alpine-morph",
+      "src": "/vendor/alpinejs-morph/cdn.min.js",
+      "cdn": "https://cdn.jsdelivr.net/npm/@alpinejs/morph@3.x.x/dist/cdn.min.js",
+      "repo": "https://github.com/alpinejs/morph",
+      "defer": true,
+      "enabled": false
+    },
+    {
+      "name": "alpine-morph-module",
+      "src": "/vendor/alpinejs-morph/module.esm.min.js",
+      "cdn": "https://cdn.jsdelivr.net/npm/@alpinejs/morph@3.x.x/dist/module.esm.min.js",
+      "repo": "https://github.com/alpinejs/morph",
+      "defer": true,
+      "enabled": false
+    },
+    {
+      "name": "alpine-intersect",
+      "src": "/vendor/alpinejs-intersect/cdn.min.js",
+      "cdn": "https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.x.x/dist/cdn.min.js",
+      "repo": "https://github.com/alpinejs/intersect",
+      "defer": true,
+      "enabled": false
+    },
+    {
+      "name": "alpine-intersect-module",
+      "src": "/vendor/alpinejs-intersect/module.esm.min.js",
+      "cdn": "https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.x.x/dist/module.esm.min.js",
+      "repo": "https://github.com/alpinejs/intersect",
+      "defer": true,
+      "enabled": false
+    },
+    {
+      "src": "/vendor/animejs/anime.umd.min.js",
+      "cdn": "https://cdn.jsdelivr.net/npm/animejs@4.2.2/dist/bundles/anime.umd.min.js",
+      "name": "animejs",
+      "defer": false,
+      "enabled": true,
+      "use_cdn": false
+    },
+    {
+      "src": "/vendor/tailwindcss/browser@4.js",
+      "cdn": "https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4",
+      "name": "tailwindcss",
+      "enabled": true,
+      "use_cdn": true
+    },
+    {
+      "src": "/vendor/daisyui/daisyui@5.css",
+      "cdn": "https://cdn.jsdelivr.net/npm/daisyui@5",
+      "name": "daisyui",
+      "enabled": false,
+      "use_cdn": true,
+      "type": "css"
+    }
+  ]
+}
+
