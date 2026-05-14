@@ -1,10 +1,14 @@
+using System.Diagnostics;
+using System.Reflection;
 using System.Text;
 using CodeMechanic.Diagnostics;
 using CodeMechanic.Razorhat;
 using CodeMechanic.Shargs;
 using CodeMechanic.Types;
 using Htmx;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Neo4j.Driver;
 using Serilog.Core;
 
 namespace OnlyPaws.Pages;
@@ -12,10 +16,13 @@ namespace OnlyPaws.Pages;
 public class PetSearch : RazorhatIsland
 {
     private readonly bool debug;
+    private readonly PetUploaderService petrepo;
 
-    public PetSearch(ArgsMap a, Logger l) : base(a, l)
+    public PetSearch(ArgsMap a, Logger l, PetUploaderService petrepo) : base(a, l)
     {
         this.debug = a.HasFlag("--debug");
+
+        this.petrepo = petrepo;
     }
 
     public static List<Pet> Pets { get; set; } = new();
@@ -31,8 +38,17 @@ public class PetSearch : RazorhatIsland
 
     public async Task<IActionResult> OnGetSearchPets(string search)
     {
+        var watch = Stopwatch.StartNew();
         // logger.Information($"Searching for pet matching '{Query}' ...");
         logger.Information($"Searching for pet matching '{search}' ...");
+
+        // var pet_records = await petrepo.GetPetsByName(search);
+        // pet_records.Dump(nameof(pet_records));
+
+        // var movies = pet_records.AsObjectsAsync<Movie>();
+
+        // var pets = pet_records.ToListOf<Pet>(label: "pets");
+        // pets.Dump(nameof(pets));
 
         var results = string.IsNullOrEmpty(search)
             ? Pets
@@ -40,10 +56,10 @@ public class PetSearch : RazorhatIsland
                 .Where(pet => pet.ToString().Contains(search, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-
         Results = new PetsGrid(results) { pets = results };
+
         // if (debug)
-        Results.pets.Dump(nameof(Results));
+        // Results.pets.Dump(nameof(Results));
 
         if (!Request.IsHtmx())
             return Page();
@@ -55,11 +71,14 @@ public class PetSearch : RazorhatIsland
         //     h.Push(Request.GetEncodedUrl());
         // });
 
+        watch.LogTime();
         return Partial("_PetsGrid", Results);
     }
 
     private async Task<List<Pet>> SeedFakePets()
     {
+        var watch = Stopwatch.StartNew();
+
         var fake_pets = new List<Pet>()
         {
             new Pet()
@@ -85,19 +104,22 @@ public class PetSearch : RazorhatIsland
         };
 
 
-        // try
-        // {
-        //     (string upsert_pets_cypher, var parms) = fake_pets.ToMergeCypher();
-        //
-        //     logger.Information($"Cypher for pet :>> {upsert_pets_cypher}");
-        // }
-        // catch (Exception e)
-        // {
-        //     logger.Error(e.ToString());
-        // }
+        try
+        {
+            await petrepo.UploadPetsToNeo4jAsync(fake_pets);
+
+            // (string upsert_pets_cypher, var parms) = fake_pets.ToMergeCypher();
+            //
+            // logger.Information($"Cypher for pet :>> {upsert_pets_cypher}");
+        }
+        catch (Exception e)
+        {
+            logger.Error(e.ToString());
+        }
 
         logger.Information($"Total pets loaded {fake_pets.Count}");
 
+        watch.LogTime();
         return fake_pets;
     }
 }
@@ -147,4 +169,39 @@ public record struct Profile()
 {
     public bool IsLoggedIn { get; set; } = false;
     public Hooman User { get; set; } = new();
+}
+
+public static class Neo4jRecordExtensions
+{
+    public static object ToListOf<T>(this List<IRecord> records
+        , string label = null
+        // , string first_layer = "Properties" // Stopgap - usually we want "Properties".
+        , PropertyInfo[] props = null)
+    {
+        if (label.IsEmpty())
+            label = typeof(T).Name.ToLower();
+
+        var results = new List<T>();
+
+        var properties = props?.Length > 0 ? props : typeof(T).GetProperties();
+
+        var pets = records
+            .Select(rec => rec[label].As<Dictionary<string, object>>())
+            .ToArray();
+
+        pets.Dump(nameof(pets));
+
+        foreach (var rec in records.Select(x => x.Values))
+        {
+            foreach (var prop in properties)
+            {
+                string key = prop.Name;
+                // object value = rec[key].As(prop.PropertyType);
+                // var instance = Activator.CreateInstance<T>();
+                // prop.SetValue(instance, value);
+            }
+        }
+
+        return results;
+    }
 }

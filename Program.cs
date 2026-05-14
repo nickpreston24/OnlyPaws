@@ -1,6 +1,11 @@
+using CodeMechanic.FileSystem;
 using CodeMechanic.Logging;
 using CodeMechanic.Razorhat;
 using CodeMechanic.Shargs;
+using OnlyPaws.Pages;
+
+
+DotEnv.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +18,7 @@ builder.UseImportMap();
 
 builder.Services.AddSingleton(logger);
 builder.Services.AddSingleton(arguments);
+builder.Services.AddSingleton<PetUploaderService>();
 builder.Services.AddSingleton<PetImagesService>();
 
 var app = builder.Build();

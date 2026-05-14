@@ -1,12 +1,14 @@
 using System.Collections.Concurrent;
 using System.Reflection;
 using CodeMechanic.Async;
+using CodeMechanic.Diagnostics;
 using CodeMechanic.FileSystem;
 using CodeMechanic.Logging;
 using CodeMechanic.Neo4j;
 using CodeMechanic.Shargs;
 using CodeMechanic.Types;
 using Neo4j.Driver;
+using Neo4j.Driver.Mapping;
 using Serilog.Core;
 
 namespace OnlyPaws.Pages;
@@ -21,7 +23,7 @@ public class PetUploaderService : QueuedService
     private readonly Logger logger;
     private readonly bool web_mode;
     private readonly Neo4jCredentials credentials;
-    private readonly IDriver _neo;
+    private readonly IDriver neo;
 
     private bool debug;
     private bool upload_to_neo4j;
@@ -42,20 +44,79 @@ public class PetUploaderService : QueuedService
 
         this.credentials = new Neo4jCredentials();
 
-        this._neo = GraphDatabase.Driver(credentials.uri,
+        if (debug)
+            credentials.Dump(nameof(credentials));
+
+        this.neo = GraphDatabase.Driver(credentials.uri,
             AuthTokens.Basic(credentials.username, credentials.password),
             o => o.WithConnectionTimeout(TimeSpan.FromSeconds(30))
                 .WithMaxConnectionPoolSize(20)
                 .WithConnectionAcquisitionTimeout(TimeSpan.FromSeconds(15)));
     }
 
-    private async Task UploadPetsToNeo4jAsync(List<Pet> records)
+
+    public async Task<IReadOnlyList<Pet>> GetPetsByName(string name)
+    {
+        logger.Information(nameof(GetPetsByName));
+
+        string cypher = $@"match (p:Pet)
+        where p.name CONTAINS '{name}'
+        return p.name as name, p.age as age";
+
+        logger.Information($"{nameof(cypher)} :>> {cypher}");
+
+        var driver = GraphDatabase.Driver(credentials.uri,
+            AuthTokens.Basic(credentials.username, credentials.password),
+            o => o.WithConnectionTimeout(TimeSpan.FromSeconds(30))
+                .WithMaxConnectionPoolSize(20)
+                .WithConnectionAcquisitionTimeout(TimeSpan.FromSeconds(15)));
+
+        if (debug)
+            await MoviesSampleMapping(driver);
+
+
+        var pets = await driver
+            .ExecutableQuery(cypher)
+            .WithConfig(new QueryConfig(database: "neo4j"))
+            .ExecuteAsync()
+            .AsObjectsAsync<Pet>();
+
+        foreach (var pet in pets)
+            Console.WriteLine(pet);
+
+        // var results = await ExecuteCypherAsync(cypher, CypherMode.Read, new { name, lower = name.ToLower() });
+
+        // Console.WriteLine($"{nameof(results.Count)} :>> {results.Count}");
+        // results.Dump(nameof(results));
+        return pets;
+    }
+
+    private static async Task<IEnumerable<Movie>> MoviesSampleMapping(IDriver driver)
+    {
+        var result = await driver
+            .ExecutableQuery("""
+                                 MATCH (n:Movie)
+                                 RETURN n.title, n.released
+                             """)
+            .ExecuteAsync();
+
+        var movies = result.Result
+            .Select(r => new Movie(
+                r["n.title"].As<string>(),
+                r["n.released"].As<int>()
+            ));
+
+        foreach (var movie in movies)
+            Console.WriteLine(movie);
+
+        return movies;
+    }
+
+    private record Movie(string title, int released);
+
+    public async Task UploadPetsToNeo4jAsync(List<Pet> records)
     {
         logger.Information(nameof(UploadPetsToNeo4jAsync));
-
-        string cwd = Directory.GetCurrentDirectory();
-        string projects_dir = UnixPathExtensions.AsUnixPath("~/Desktop/projects/personal");
-
 
         logger.Information($"Upserting {records.Count} records of type {typeof(Pet)}");
 
@@ -67,29 +128,27 @@ public class PetUploaderService : QueuedService
         try
         {
             logger.Information($"Upserting {pets.Count} records of type Pet");
+            if (pets.IsNullOrEmpty())
+                return;
 
 
-            foreach (var pet in pets.Where(p => p.age > 0))
+            foreach (var pet in pets.Where(p => p.name.NotEmpty()))
             {
-                if (pet.name.IsEmpty())
-                {
-                    logger.Information($"{nameof(pet.name)} :>> {pet.name}");
-                }
-
                 var (cypher, parms) = pet.ToMergeCypher<Pet>();
-                await ExecuteCypherAsync(cypher, CypherMode.Write, parms);
 
-                logger.Information($"cypher for {pet.age} :>> \n" + AnsiColors.Blue(cypher) + "\n\n");
+                logger.Information($"cypher for {pet.name} :>> \n" + AnsiColors.Blue(cypher) + "\n\n");
 
                 // parms.Dump(nameof(parms));
 
-                foreach (var m in pet.original_owners)
+                await ExecuteCypherAsync(cypher, CypherMode.Write, parms);
+
+                foreach (var hooman in pet.original_owners ?? Enumerable.Empty<Hooman>())
                 {
-                    var (mCypher, mParms) = m.ToMergeCypher<Hooman>();
+                    var (mCypher, mParms) = hooman.ToMergeCypher<Hooman>();
 
-                    logger.Information($"cypher for {m.name} :>> \n" + AnsiColors.Yellow(cypher) + "\n\n");
+                    logger.Information($"cypher for {hooman.name} :>> \n" + AnsiColors.Yellow(cypher) + "\n\n");
 
-                    await ExecuteCypherAsync(mCypher, CypherMode.Write, mParms);
+                    // await ExecuteCypherAsync(mCypher, CypherMode.Write, mParms);
                 }
             }
         }
@@ -104,7 +163,7 @@ public class PetUploaderService : QueuedService
     {
         if (string.IsNullOrWhiteSpace(cypher)) return new();
 
-        await using var session = _neo.AsyncSession(o => o.WithDatabase(credentials.database));
+        await using var session = neo.AsyncSession(o => o.WithDatabase(credentials.database));
 
         try
         {
@@ -214,8 +273,11 @@ public static class Neo4jCsharpExtensions
         parms["id"] = id;
         // parms["name"] = namespace_name; // ensure it's never null
 
+        parms["skills"] = null;
+        parms.Remove("skills");
+
         var setClauses = parms.Keys
-            .Where(k => k != "id")
+            .Where(k => k != "id" && k != "skills")
             .Select(k => $"n.{k} = ${k}");
 
         string setPart = $"SET {string.Join(", ", setClauses)}, n.updated = timestamp()";
