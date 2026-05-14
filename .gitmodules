@@ -1,0 +1,3 @@
+[submodule "wwwroot/vendors"]
+	path = wwwroot/vendors
+	url = https://github.com/nickpreston24/vendors.git

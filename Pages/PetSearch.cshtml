@@ -1,0 +1,35 @@
+@page
+@model OnlyPaws.Pages.PetSearch
+
+@{
+    Layout = null;
+}
+
+<section class="bg-black">
+
+    <grid cols="2" class="bg-base-100/50">
+
+        <signin/>
+
+        @foreach (var pet in @Model.Pets)
+        {
+            <div class="card card-side bg-base-100 shadow-sm">
+                <figure>
+                    <img
+                        src="@pet.img_url"
+                        alt="Movie"/>
+                </figure>
+                <div class="card-body">
+                    <h2 class="card-title">New Pet is available!</h2>
+                    <p>@pet.hook</p>
+                    <div class="card-actions justify-end">
+                        <button class="btn btn-primary">Watch</button>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @* <alpine-toggle-sample/> *@
+
+    </grid>
+</section>

@@ -19,11 +19,13 @@
     <PackageReference Include="CodeMechanic.Embeds" Version="*" />
     <PackageReference Include="CodeMechanic.FileSystem" Version="2.0.17" />
     <PackageReference Include="CodeMechanic.Logging" Version="1.0.3" />
+    <PackageReference Include="CodeMechanic.Neo4j" Version="1.0.1" />
     <PackageReference Include="CodeMechanic.Razorhat" Version="1.0.2" />
     <PackageReference Include="CodeMechanic.Reflection" Version="*" />
     <PackageReference Include="CodeMechanic.RegularExpressions" Version="*" />
     <PackageReference Include="CodeMechanic.Shargs" Version="1.0.6" />
     <PackageReference Include="CodeMechanic.Types" Version="*" />
+    <PackageReference Include="Drip.UI" Version="1.0.2" />
     <PackageReference Include="Serilog" Version="4.3.1" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
@@ -32,12 +34,6 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\vendor\" />
-  </ItemGroup>
-
-
-  <ItemGroup>
-    <None Include="wwwroot\onlypaws_470039194_928543575901629_5422224430674446325_n.jpg" />
-    <None Include="wwwroot\only_paws_470145056_928542652568388_4589592136647167858_n.jpg" />
   </ItemGroup>
 
 </Project>
