@@ -224,6 +224,8 @@ public static class Neo4jCsharpExtensions
 MERGE (n:{label} {{id: $id}})
 {setPart}
 ";
+
+
 //
 //         if (typeof(T) == typeof(Pet))
 //         {

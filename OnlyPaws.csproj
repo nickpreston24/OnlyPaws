@@ -26,6 +26,8 @@
     <PackageReference Include="CodeMechanic.Shargs" Version="1.0.6" />
     <PackageReference Include="CodeMechanic.Types" Version="*" />
     <PackageReference Include="Drip.UI" Version="1.0.2" />
+    <PackageReference Include="Htmx" Version="1.12.0" />
+    <PackageReference Include="Htmx.TagHelpers" Version="1.12.0" />
     <PackageReference Include="Serilog" Version="4.3.1" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />

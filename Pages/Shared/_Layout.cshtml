@@ -10,9 +10,10 @@
     @Html.Raw(ImportMap.RenderAsScripts(debug: true))
 
     <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css"/>
+    <script src="https://cdn.jsdelivr.net/npm/@@tailwindcss/browser@4"></script>
 
 </head>
-<body>
+<body class="border-2 border-accent">
 <header>
     <div class="navbar bg-rose-400 text-neutral-content">
         <span type="button" class="btn bg-rose-800 text-white text-xl">OnlyPaws
@@ -20,17 +21,18 @@
     </div>
 </header>
 <div class="">
-    <main role="main" class="pb-3">
+    <main role="main" class="m-4">
         @RenderBody()
     </main>
 </div>
 
 <footer class="border-top footer text-muted">
-    <div class="container">
+    <div class="">
         &copy; 2026 - OnlyPaws - <a asp-area="" asp-page="/Privacy">Privacy</a>
     </div>
 </footer>
 
 @await RenderSectionAsync("Scripts", required: false)
+<script src="/_framework/aspnetcore-browser-refresh.js"></script>
 </body>
 </html>

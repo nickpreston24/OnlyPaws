@@ -1,0 +1,53 @@
+@model PetsGrid
+@{
+}
+
+
+<section id="pet-results">
+
+    @if (@Model.pets?.Count > 0)
+    {
+        @foreach (var pet in @Model.pets ?? Enumerable.Empty<Pet>())
+        {
+            <div class="card bg-base-100 shadow-sm">
+                <figure>
+                    <img
+                        class="max-w-128"
+                        src="@pet.img_url"
+                        alt="Movie"/>
+                </figure>
+                <div x-data="{ open: false}" class="card-body">
+                    <h2 class="card-title">@pet.name is available!</h2>
+                    <div class="">
+                        <b>Tricks:</b>
+                        @foreach (var skill in @pet.skills)
+                        {
+                            <span class="badge badge-accent">@skill.Name</span>
+                        }
+                    </div>
+                    <div class="card-actions justify-end">
+                        <span type="button" class="text-white  btn  bg-rose-500">Watch</span>
+
+
+                        <div x-data="{ open: false }">
+                            <span class="btn btn-primary" type="button" x-on:click="open = !open">Details</span>
+
+                            <span x-show="open">
+                                @pet.story
+                            </span>
+                        </div>
+
+                        <p>@pet.hook</p>
+                    </div>
+
+
+                </div>
+
+
+            </div>
+        }
+    }
+    else {
+    <span>No Pets Available.</span>
+    }
+</section>
