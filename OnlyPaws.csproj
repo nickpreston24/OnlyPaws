@@ -34,4 +34,10 @@
     <Folder Include="wwwroot\vendor\" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <None Include="wwwroot\onlypaws_470039194_928543575901629_5422224430674446325_n.jpg" />
+    <None Include="wwwroot\only_paws_470145056_928542652568388_4589592136647167858_n.jpg" />
+  </ItemGroup>
+
 </Project>
