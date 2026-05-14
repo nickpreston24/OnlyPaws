@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.Reflection;
 using CodeMechanic.Async;
 using CodeMechanic.Diagnostics;
@@ -57,11 +58,12 @@ public class PetUploaderService : QueuedService
 
     public async Task<IReadOnlyList<Pet>> GetPetsByName(string name)
     {
+        var pets = new List<Pet>();
         logger.Information(nameof(GetPetsByName));
 
         string cypher = $@"match (p:Pet)
         where p.name CONTAINS '{name}'
-        return p.name as name, p.age as age";
+        return p.name, p.age";
 
         logger.Information($"{nameof(cypher)} :>> {cypher}");
 
@@ -74,21 +76,34 @@ public class PetUploaderService : QueuedService
         if (debug)
             await MoviesSampleMapping(driver);
 
-
-        var pets = await driver
+        var result = await driver
             .ExecutableQuery(cypher)
-            .WithConfig(new QueryConfig(database: "neo4j"))
-            .ExecuteAsync()
-            .AsObjectsAsync<Pet>();
+            .ExecuteAsync();
 
-        foreach (var pet in pets)
-            Console.WriteLine(pet);
+        if (result.Result.Count == 0) return new List<Pet>();
 
+        try
+        {
+            pets = result.Result
+                .Select(r => new Pet(
+                    r["p.name"].As<string>(),
+                    r["p.age"].As<double>()
+                )).ToList();
+
+            foreach (var pet in pets)
+                Console.WriteLine(pet);
+        }
+        catch (Exception e)
+        {
+            logger.Error(e.ToString());
+            // throw;
+        }
         // var results = await ExecuteCypherAsync(cypher, CypherMode.Read, new { name, lower = name.ToLower() });
 
         // Console.WriteLine($"{nameof(results.Count)} :>> {results.Count}");
         // results.Dump(nameof(results));
-        return pets;
+
+        return pets.ToImmutableList();
     }
 
     private static async Task<IEnumerable<Movie>> MoviesSampleMapping(IDriver driver)

@@ -42,8 +42,8 @@ public class PetSearch : RazorhatIsland
         // logger.Information($"Searching for pet matching '{Query}' ...");
         logger.Information($"Searching for pet matching '{search}' ...");
 
-        // var pet_records = await petrepo.GetPetsByName(search);
-        // pet_records.Dump(nameof(pet_records));
+        var pet_records = await petrepo.GetPetsByName(search);
+        pet_records.Dump(nameof(pet_records));
 
         // var movies = pet_records.AsObjectsAsync<Movie>();
 
@@ -129,11 +129,11 @@ public record struct PetsGrid(List<Pet> pets)
     public List<Pet> pets { get; set; } = new();
 }
 
-public record struct Pet()
+public record struct Pet(string name, double age)
 {
-    public string name { get; set; } = string.Empty;
-
-    public double age { get; set; }
+    // public string name { get; set; } = string.Empty;
+    //
+    // public double age { get; set; }
 
     public string img_url { get; set; } = string.Empty;
     public List<Hooman> original_owners { get; set; } = new();
