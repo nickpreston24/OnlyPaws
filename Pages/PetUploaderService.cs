@@ -63,7 +63,7 @@ public class PetUploaderService : QueuedService
 
         string cypher = $@"match (p:Pet)
         where p.name CONTAINS '{name}'
-        return p.name, p.age";
+        return p.name, p.age, p.img_url";
 
         logger.Information($"{nameof(cypher)} :>> {cypher}");
 
@@ -85,10 +85,8 @@ public class PetUploaderService : QueuedService
         try
         {
             pets = result.Result
-                .Select(r => new Pet(
-                    r["p.name"].As<string>(),
-                    r["p.age"].As<double>()
-                )).ToList();
+                .Select(MapPet)
+                .ToList();
 
             foreach (var pet in pets)
                 Console.WriteLine(pet);
@@ -227,6 +225,57 @@ public class PetUploaderService : QueuedService
     ";
         await ExecuteCypherAsync(hoomanidx, CypherMode.Write);
     }
+
+    public async Task<List<Pet>> GetPets(int limit = 100)
+    {
+        var cypher = $@"match (p:Pet) return p.name, p.age, p.img_url limit {limit}";
+
+        var result = await this.neo
+            .ExecutableQuery(cypher)
+            .ExecuteAsync();
+
+        if (result.Result.Count == 0) return new List<Pet>();
+
+        var pets = new List<Pet>();
+        try
+        {
+            pets = result.Result
+                .Select(MapPet).ToList();
+        }
+        catch (Exception e)
+        {
+            logger.Information(e.ToString());
+            // throw;
+        }
+
+
+        return pets;
+    }
+
+    private Pet MapPet(IRecord record)
+    {
+        return new Pet
+        {
+            name = record.TryGet<string>("p.name"),
+            age = record.TryGet<double>("p.age"),
+            img_url = record.TryGet<string>("p.img_url"),
+            story = record.TryGet<string>("p.story"),
+        };
+    }
+
+    // private Pet Selector(IRecord r)
+    // {
+    //     try
+    //     {
+    //         var pet = new Pet(r["p.name"].As<string>(), r["p.age"].As<double>());
+    //         return pet;
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Console.WriteLine(e);
+    //         return new Pet();
+    //     }
+    // }
 }
 
 // FIXED ToMergeCypher - safe namespace handling

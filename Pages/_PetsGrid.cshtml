@@ -1,3 +1,4 @@
+@using CodeMechanic.Types
 @model PetsGrid
 @{
 }
@@ -5,7 +6,7 @@
 
 <section id="pet-results">
 
-    @if (@Model.pets?.Count > 0)
+    @if (!@Model.pets.IsNullOrEmpty())
     {
         @foreach (var pet in @Model.pets ?? Enumerable.Empty<Pet>())
         {
@@ -20,7 +21,7 @@
                     <h2 class="card-title">@pet.name is available!</h2>
                     <div class="">
                         <b>Tricks:</b>
-                        @foreach (var skill in @pet.skills)
+                        @foreach (var skill in @pet.skills ?? Enumerable.Empty<Skill>())
                         {
                             <span class="badge badge-accent">@skill.Name</span>
                         }
@@ -47,7 +48,8 @@
             </div>
         }
     }
-    else {
-    <span>No Pets Available.</span>
+    else
+    {
+        <span>No Pets Available.</span>
     }
 </section>

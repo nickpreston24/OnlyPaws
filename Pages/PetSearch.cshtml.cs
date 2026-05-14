@@ -38,46 +38,66 @@ public class PetSearch : RazorhatIsland
 
     public async Task<IActionResult> OnGetSearchPets(string search)
     {
-        var watch = Stopwatch.StartNew();
-        // logger.Information($"Searching for pet matching '{Query}' ...");
-        logger.Information($"Searching for pet matching '{search}' ...");
+        try
+        {
+            var watch = Stopwatch.StartNew();
+            // logger.Information($"Searching for pet matching '{Query}' ...");
+            logger.Information($"Searching for pet matching '{search}' ...");
 
-        var pet_records = await petrepo.GetPetsByName(search);
-        pet_records.Dump(nameof(pet_records));
+            var pet_records = await petrepo.GetPetsByName(search);
+            pet_records.Dump(nameof(pet_records));
 
-        // var movies = pet_records.AsObjectsAsync<Movie>();
+            // if (pet_records.Count == 0)
+            //     return Partial("_PetsGrid", new PetsGrid());
 
-        // var pets = pet_records.ToListOf<Pet>(label: "pets");
-        // pets.Dump(nameof(pets));
+            var results = pet_records.ToList();
 
-        var results = string.IsNullOrEmpty(search)
-            ? Pets
-            : Pets
-                .Where(pet => pet.ToString().Contains(search, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+            // string.IsNullOrEmpty(search)
+            // ? Pets
+            // : Pets
+            //     .Where(pet => pet.ToString().Contains(search, StringComparison.OrdinalIgnoreCase))
+            //     .ToList();
 
-        Results = new PetsGrid(results) { pets = results };
+            Results.Dump(nameof(Results));
+            Results = new PetsGrid(results) { pets = results };
 
-        // if (debug)
-        // Results.pets.Dump(nameof(Results));
+            // if (debug)
+            // Results.pets.Dump(nameof(Results));
 
-        if (!Request.IsHtmx())
-            return Page();
+            if (!Request.IsHtmx())
+                return Page();
 
-        // Response.Htmx(h =>
-        // {
-        //     // we want to push the current url
-        //     // into the history
-        //     h.Push(Request.GetEncodedUrl());
-        // });
+            // Response.Htmx(h =>
+            // {
+            //     // we want to push the current url
+            //     // into the history
+            //     h.Push(Request.GetEncodedUrl());
+            // });
 
-        watch.LogTime();
-        return Partial("_PetsGrid", Results);
+            watch.LogTime();
+            return Partial("_PetsGrid", Results);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return Partial("_PetsGrid", Results);
+        }
     }
 
     private async Task<List<Pet>> SeedFakePets()
     {
         var watch = Stopwatch.StartNew();
+
+
+        var existing_pets = await petrepo.GetPets(limit: 100);
+
+        if (!existing_pets.IsNullOrEmpty())
+        {
+            logger.Information($"Found {existing_pets.Count} existing pets");
+            existing_pets.Dump(nameof(existing_pets));
+
+            return existing_pets;
+        }
 
         var fake_pets = new List<Pet>()
         {
@@ -143,7 +163,9 @@ public record struct Pet(string name, double age)
 
     public override string ToString()
     {
-        string skill_content = new StringBuilder().AppendEach(skills, s => s.Name, delimiter: ",").ToString();
+        string skill_content = new StringBuilder()
+            .AppendEach(skills ?? Enumerable.Empty<Skill>(), s => s.Name, delimiter: ",").ToString();
+
         string content = $@"
         name: {name}
         age: {age}
@@ -173,35 +195,49 @@ public record struct Profile()
 
 public static class Neo4jRecordExtensions
 {
-    public static object ToListOf<T>(this List<IRecord> records
-        , string label = null
-        // , string first_layer = "Properties" // Stopgap - usually we want "Properties".
-        , PropertyInfo[] props = null)
+    // public static object ToListOf<T>(this List<IRecord> records
+    //     , string label = null
+    //     // , string first_layer = "Properties" // Stopgap - usually we want "Properties".
+    //     , PropertyInfo[] props = null)
+    // {
+    //     if (label.IsEmpty())
+    //         label = typeof(T).Name.ToLower();
+    //
+    //     var results = new List<T>();
+    //
+    //     var properties = props?.Length > 0 ? props : typeof(T).GetProperties();
+    //
+    //     var pets = records
+    //         .Select(rec => rec[label].As<Dictionary<string, object>>())
+    //         .ToArray();
+    //
+    //     pets.Dump(nameof(pets));
+    //
+    //     foreach (var rec in records.Select(x => x.Values))
+    //     {
+    //         foreach (var prop in properties)
+    //         {
+    //             string key = prop.Name;
+    //             // object value = rec[key].As(prop.PropertyType);
+    //             // var instance = Activator.CreateInstance<T>();
+    //             // prop.SetValue(instance, value);
+    //         }
+    //     }
+    //
+    //     return results;
+    // }
+    //
+
+    public static T? TryGet<T>(this IRecord r, string key)
     {
-        if (label.IsEmpty())
-            label = typeof(T).Name.ToLower();
+        if (!r.Keys.Contains(key))
+            return default;
 
-        var results = new List<T>();
+        var value = r[key];
 
-        var properties = props?.Length > 0 ? props : typeof(T).GetProperties();
+        if (value is null)
+            return default;
 
-        var pets = records
-            .Select(rec => rec[label].As<Dictionary<string, object>>())
-            .ToArray();
-
-        pets.Dump(nameof(pets));
-
-        foreach (var rec in records.Select(x => x.Values))
-        {
-            foreach (var prop in properties)
-            {
-                string key = prop.Name;
-                // object value = rec[key].As(prop.PropertyType);
-                // var instance = Activator.CreateInstance<T>();
-                // prop.SetValue(instance, value);
-            }
-        }
-
-        return results;
+        return value.As<T>();
     }
 }
