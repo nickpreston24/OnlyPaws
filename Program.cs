@@ -1,10 +1,12 @@
+using System.Diagnostics;
+using CodeMechanic.Diagnostics;
 using CodeMechanic.FileSystem;
 using CodeMechanic.Logging;
 using CodeMechanic.Razorhat;
 using CodeMechanic.Shargs;
 using OnlyPaws.Pages;
 
-
+var watch = Stopwatch.StartNew();
 DotEnv.Load();
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +22,9 @@ builder.Services.AddSingleton(logger);
 builder.Services.AddSingleton(arguments);
 builder.Services.AddSingleton<PetUploaderService>();
 builder.Services.AddSingleton<PetImagesService>();
+
+
+builder.Services.AddScoped<OrganizationFinder>();
 
 var app = builder.Build();
 
@@ -42,4 +47,5 @@ app.MapStaticAssets();
 app.MapRazorPages()
     .WithStaticAssets();
 
+watch.LogTime(logger.Information);
 app.Run();

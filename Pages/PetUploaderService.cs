@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Reflection;
 using CodeMechanic.Async;
 using CodeMechanic.Diagnostics;
@@ -9,14 +10,11 @@ using CodeMechanic.Neo4j;
 using CodeMechanic.Shargs;
 using CodeMechanic.Types;
 using Neo4j.Driver;
-using Neo4j.Driver.Mapping;
 using Serilog.Core;
 
 namespace OnlyPaws.Pages;
 
 /// <summary>
-/// 1. Deep parse using ExtractV3
-/// 2. Upload to neo4j brain for vectorization via LLMs.
 /// </summary>
 public class PetUploaderService : QueuedService
 {
@@ -55,47 +53,50 @@ public class PetUploaderService : QueuedService
                 .WithConnectionAcquisitionTimeout(TimeSpan.FromSeconds(15)));
     }
 
-
     public async Task<IReadOnlyList<Pet>> GetPetsByName(string name)
     {
         var pets = new List<Pet>();
         logger.Information(nameof(GetPetsByName));
 
         string cypher = $@"match (p:Pet)
-        where p.name CONTAINS '{name}'
+        where p.name CONTAINS '{name}' or p.name = '{name}'
         return p.name, p.age, p.img_url";
 
         logger.Information($"{nameof(cypher)} :>> {cypher}");
 
-        var driver = GraphDatabase.Driver(credentials.uri,
-            AuthTokens.Basic(credentials.username, credentials.password),
-            o => o.WithConnectionTimeout(TimeSpan.FromSeconds(30))
-                .WithMaxConnectionPoolSize(20)
-                .WithConnectionAcquisitionTimeout(TimeSpan.FromSeconds(15)));
 
-        if (debug)
-            await MoviesSampleMapping(driver);
+        // var query_timer = Stopwatch.StartNew();
+        // var result = await neo
+        //     .ExecutableQuery(cypher)
+        //     .ExecuteAsync();
+        //
+        // query_timer.LogTime(logger.Information, method_name: "regular");
 
-        var result = await driver
-            .ExecutableQuery(cypher)
-            .ExecuteAsync();
+        var execute_non_timer = Stopwatch.StartNew();
 
-        if (result.Result.Count == 0) return new List<Pet>();
+        var records = await ExecuteCypherAsync(cypher, CypherMode.Read, new { name });
 
-        try
-        {
-            pets = result.Result
-                .Select(MapPet)
-                .ToList();
+        execute_non_timer.LogTime(logger.Information, method_name: "exec cypher async");
 
-            foreach (var pet in pets)
-                Console.WriteLine(pet);
-        }
-        catch (Exception e)
-        {
-            logger.Error(e.ToString());
-            // throw;
-        }
+        return records.Select(MapPet).ToImmutableList();
+
+        // if (result.Result.Count == 0) return new List<Pet>();
+        //
+        // try
+        // {
+        //     pets = result.Result
+        //         .Select(MapPet)
+        //         .ToList();
+        //
+        //     if (debug)
+        //         foreach (var pet in pets)
+        //             Console.WriteLine(pet);
+        // }
+        // catch (Exception e)
+        // {
+        //     logger.Error(e.ToString());
+        //     // throw;
+        // }
         // var results = await ExecuteCypherAsync(cypher, CypherMode.Read, new { name, lower = name.ToLower() });
 
         // Console.WriteLine($"{nameof(results.Count)} :>> {results.Count}");
@@ -172,17 +173,26 @@ public class PetUploaderService : QueuedService
         }
     }
 
+
     private async Task<List<IRecord>> ExecuteCypherAsync(string cypher, CypherMode mode, object? parameters = null)
     {
-        if (string.IsNullOrWhiteSpace(cypher)) return new();
+        if (string.IsNullOrWhiteSpace(cypher)) return [];
 
-        await using var session = neo.AsyncSession(o => o.WithDatabase(credentials.database));
+        await using var session = neo.AsyncSession(o =>
+            o.WithDatabase(credentials.database)); // Explicit = no discovery roundtrip
 
         try
         {
-            return mode == CypherMode.Read
-                ? await session.ExecuteReadAsync(async tx => await tx.RunAndCollectAsync(cypher, parameters))
-                : await session.ExecuteWriteAsync(async tx => await tx.RunAndCollectAsync(cypher, parameters));
+            if (mode == CypherMode.Read)
+            {
+                // FASTEST PATH for simple reads: direct auto-commit
+                var cursor = await session.RunAsync(cypher, parameters);
+                return await cursor.ToListAsync();
+            }
+
+            // Only use managed tx for writes
+            return await session.ExecuteWriteAsync(async tx =>
+                await tx.RunAndCollectAsync(cypher, parameters));
         }
         catch (Exception ex)
         {
@@ -191,35 +201,36 @@ public class PetUploaderService : QueuedService
         }
     }
 
-    // Grok: https://grok.com/share/c2hhcmQtMw_5bb892b6-7ad6-4285-aae5-051bdb98b97d
-//     public async Task<List<IRecord>> GetSimlarMethodsAsync()
-//     {
-//         string query = @"// 2. Best hybrid query right now (save as favorite)
-// MATCH (ns:Namespace)-[:CONTAINS]->(c:Pet)-[:CONTAINS]->(m:Hooman)
-// WHERE vector.similarity.cosine(m.embedding, $queryEmbedding) > 0.78
-// RETURN
-//     ns.name + '.' + c.age + '.' + m.name AS fullSignature,
-//     m.bodyContent AS body,
-//     vector.similarity.cosine(m.embedding, $queryEmbedding) AS score
-// ORDER BY score DESC
-// LIMIT 15";
-//
-//         return null;
-//     }
+    // private async Task<List<IRecord>> ExecuteCypherAsync(string cypher, CypherMode mode, object? parameters = null)
+    // {
+    //     if (string.IsNullOrWhiteSpace(cypher)) return new();
+    //
+    //     await using var session = neo.AsyncSession(o => o.WithDatabase(credentials.database));
+    //
+    //     try
+    //     {
+    //         return mode == CypherMode.Read
+    //             ? await session.ExecuteReadAsync(async tx => await tx.RunAndCollectAsync(cypher, parameters))
+    //             : await session.ExecuteWriteAsync(async tx => await tx.RunAndCollectAsync(cypher, parameters));
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         logger.Error(ex, "Cypher failed:\n{Cypher}", cypher);
+    //         throw;
+    //     }
+    // }
 
-    // 1. Add this once after upload (or in your daemon)
-    // Grok: https://grok.com/share/c2hhcmQtMw_5bb892b6-7ad6-4285-aae5-051bdb98b97d
     private async Task CreateVectorIndexAsync()
     {
         string petidx = @"
-        CREATE VECTOR INDEX codeEmbedding IF NOT EXISTS
+        CREATE VECTOR INDEX petEmbedding IF NOT EXISTS
         FOR (m:Pet) ON m.embedding
         OPTIONS { indexConfig: { `vector.dimensions`: 1536, `vector.similarity_function`: 'cosine' } }
     ";
         await ExecuteCypherAsync(petidx, CypherMode.Write);
 
         string hoomanidx = @"
-        CREATE VECTOR INDEX codeEmbedding IF NOT EXISTS
+        CREATE VECTOR INDEX hoomanEmbedding IF NOT EXISTS
         FOR (m:Hooman) ON m.embedding
         OPTIONS { indexConfig: { `vector.dimensions`: 1536, `vector.similarity_function`: 'cosine' } }
     ";
@@ -262,20 +273,6 @@ public class PetUploaderService : QueuedService
             story = record.TryGet<string>("p.story"),
         };
     }
-
-    // private Pet Selector(IRecord r)
-    // {
-    //     try
-    //     {
-    //         var pet = new Pet(r["p.name"].As<string>(), r["p.age"].As<double>());
-    //         return pet;
-    //     }
-    //     catch (Exception e)
-    //     {
-    //         Console.WriteLine(e);
-    //         return new Pet();
-    //     }
-    // }
 }
 
 // FIXED ToMergeCypher - safe namespace handling
@@ -285,9 +282,8 @@ public static class Neo4jCsharpExtensions
         this T node,
         string label = null)
     {
-        label ??= typeof(T).Name
-            //Replace("Csharp", "")
-            ;
+        var watch = Stopwatch.StartNew();
+        label ??= typeof(T).Name;
         Console.WriteLine($"{nameof(label)} :>> {label}");
 
         var parms = new Dictionary<string, object>();
@@ -374,6 +370,7 @@ MERGE (n:{label} {{id: $id}})
 //             parms["classId"] = $"{namespace_name}.{parms.GetValueOrDefault("age")}";
 //         }
 
+        watch.LogTime();
         return (cypher.Trim(), parms);
     }
 }

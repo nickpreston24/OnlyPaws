@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Reflection;
 using System.Text;
 using CodeMechanic.Diagnostics;
 using CodeMechanic.Razorhat;
@@ -17,12 +16,18 @@ public class PetSearch : RazorhatIsland
 {
     private readonly bool debug;
     private readonly PetUploaderService petrepo;
+    private readonly OrganizationFinder orgfinder;
+    private bool enable_history_pushes = false;
 
-    public PetSearch(ArgsMap a, Logger l, PetUploaderService petrepo) : base(a, l)
+    public PetSearch(ArgsMap a, Logger l
+        , PetUploaderService petrepo
+        , OrganizationFinder orgfinder
+    ) : base(a, l)
     {
         this.debug = a.HasFlag("--debug");
 
         this.petrepo = petrepo;
+        this.orgfinder = orgfinder;
     }
 
     public static List<Pet> Pets { get; set; } = new();
@@ -30,9 +35,13 @@ public class PetSearch : RazorhatIsland
 
     public async Task OnGet()
     {
-        Pets = await SeedFakePets();
+        var watch = Stopwatch.StartNew();
+        // await orgfinder.SeedOrganizations();
+        // Pets = await SeedFakePets();
 
         logger.Information(nameof(PetSearch) + " -> " + nameof(OnGet));
+
+        watch.LogTime(logger.Information);
     }
 
 
@@ -45,7 +54,7 @@ public class PetSearch : RazorhatIsland
             logger.Information($"Searching for pet matching '{search}' ...");
 
             var pet_records = await petrepo.GetPetsByName(search);
-            pet_records.Dump(nameof(pet_records));
+            if (debug) pet_records.Dump(nameof(pet_records));
 
             // if (pet_records.Count == 0)
             //     return Partial("_PetsGrid", new PetsGrid());
@@ -58,21 +67,21 @@ public class PetSearch : RazorhatIsland
             //     .Where(pet => pet.ToString().Contains(search, StringComparison.OrdinalIgnoreCase))
             //     .ToList();
 
-            Results.Dump(nameof(Results));
-            Results = new PetsGrid(results) { pets = results };
+            if (debug)
+                Results.Dump(nameof(Results));
 
-            // if (debug)
-            // Results.pets.Dump(nameof(Results));
+            Results = new PetsGrid(results) { pets = results };
 
             if (!Request.IsHtmx())
                 return Page();
 
-            // Response.Htmx(h =>
-            // {
-            //     // we want to push the current url
-            //     // into the history
-            //     h.Push(Request.GetEncodedUrl());
-            // });
+            if (this.enable_history_pushes)
+                Response.Htmx(h =>
+                {
+                    // we want to push the current url
+                    // into the history
+                    h.Push(Request.GetEncodedUrl());
+                });
 
             watch.LogTime();
             return Partial("_PetsGrid", Results);
