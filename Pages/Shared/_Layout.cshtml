@@ -5,19 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>@ViewData["Title"] - OnlyPaws</title>
 
-
-
     @inject CodeMechanic.Razorhat.ImportMap ImportMap
 
     @Html.Raw(ImportMap.RenderAsScripts(debug: true))
 
-
-    @* <script type="importmap"></script> *@
-
-    <link rel="stylesheet" href="css/site.css" asp-append-version="true"/>
-
-    <link rel="stylesheet" href="css/extra.css" asp-append-version="true"/>
-
+    <link rel="stylesheet" href="css/site.css"/>
+    <link rel="stylesheet" href="css/extra.css"/>
 
     <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css"/>
 
@@ -32,10 +25,6 @@
         <span type="button" class="btn bg-rose-800 text-white text-xl">OnlyPaws</span>
     </div>
 
-    @* <div class="navbar bg-rose-400 text-neutral-content"> *@
-    @*     <span type="button" class="btn bg-rose-800 text-white text-xl">OnlyPaws *@
-    @*     </span> *@
-    @* </div> *@
 </header>
 <div class="">
     <main role="main" class="m-4">

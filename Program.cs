@@ -1,10 +1,12 @@
 using System.Diagnostics;
+using System.Text.Json;
 using CodeMechanic.Diagnostics;
 using CodeMechanic.FileSystem;
 using CodeMechanic.Logging;
 using CodeMechanic.Razorhat;
 using CodeMechanic.Shargs;
 using OnlyPaws.Pages;
+using SerilogLoggerName = CodeMechanic.Logging.SerilogLoggerName;
 
 var watch = Stopwatch.StartNew();
 DotEnv.Load();
@@ -12,17 +14,19 @@ DotEnv.Load();
 var builder = WebApplication.CreateBuilder(args);
 
 var logger = new SerilogLoggerName(".onlypaws", "onlypaws").CreateLogger();
+
+
+logger.Information("Testing the wwwroot from onlypaws");
+
 var arguments = args.ToArgsMap();
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-builder.UseImportMap();
-
 builder.Services.AddSingleton(logger);
 builder.Services.AddSingleton(arguments);
+builder.Services.AddSingleton<ImportMap>();
 builder.Services.AddSingleton<PetUploaderService>();
 builder.Services.AddSingleton<PetImagesService>();
-
 
 builder.Services.AddScoped<OrganizationFinder>();
 

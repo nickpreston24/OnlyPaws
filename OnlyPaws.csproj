@@ -20,7 +20,7 @@
     <PackageReference Include="CodeMechanic.FileSystem" Version="2.0.17"/>
     <PackageReference Include="CodeMechanic.Logging" Version="1.0.3"/>
     <PackageReference Include="CodeMechanic.Neo4j" Version="1.0.1"/>
-    <PackageReference Include="CodeMechanic.Razorhat" Version="1.0.2"/>
+<!--    <PackageReference Include="CodeMechanic.Razorhat" Version="1.0.2"/>-->
     <PackageReference Include="CodeMechanic.Reflection" Version="*"/>
     <PackageReference Include="CodeMechanic.RegularExpressions" Version="*"/>
     <PackageReference Include="CodeMechanic.Shargs" Version="1.0.6"/>
@@ -43,13 +43,21 @@
 
 
   <ItemGroup>
-    <Content Include="vendors\**\*.*" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="vendors\**" CopyToOutputDirectory="PreserveNewest"/>
+    <!--    <Content Include="wwwroot\**" CopyToOutputDirectory="PreserveNewest" />-->
   </ItemGroup>
-  
-  
+
+
   <ItemGroup>
     <Folder Include="importmap.json"/>
-<!--    <Content Include="wwwroot/css/**/*.css"/>-->
   </ItemGroup>
+
+  <Target Name="BuildTailwind" BeforeTargets="BeforeBuild">
+    <Exec Command="sh buildcss.sh" />
+  </Target>
   
+  <ItemGroup>
+    <ProjectReference Include="..\..\CodeMechanic.Razorhat\CodeMechanic.Razorhat.csproj" />
+  </ItemGroup>
+
 </Project>
