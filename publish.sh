@@ -1,5 +1,7 @@
 set -e  # stop on any error
 
+sudo systemctl stop onlypaws
+
 echo "=== Building Tailwind + DaisyUI ==="
 cd wwwroot/vendors
 npm run build:css

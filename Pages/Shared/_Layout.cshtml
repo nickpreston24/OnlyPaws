@@ -10,11 +10,12 @@
     @Html.Raw(ImportMap.RenderAsScripts(debug: true))
 
     <link rel="stylesheet" href="css/site.css"/>
-    <link rel="stylesheet" href="css/extra.css"/>
 
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css"/>
+    <link defer rel="stylesheet" type="text/css" href="vendors/daisyui/daisyui@5.css"/>
 
-    <script src="https://cdn.jsdelivr.net/npm/@@tailwindcss/browser@4"></script>
+    @* <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css"/> *@
+    @* *@
+    @* <script src="https://cdn.jsdelivr.net/npm/@@tailwindcss/browser@4"></script> *@
 
 
 </head>
