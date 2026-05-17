@@ -14,42 +14,42 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CodeMechanic.Async" Version="1.0.4"/>
-    <PackageReference Include="CodeMechanic.Diagnostics" Version="*"/>
-    <PackageReference Include="CodeMechanic.Embeds" Version="*"/>
-    <PackageReference Include="CodeMechanic.FileSystem" Version="2.0.17"/>
-    <PackageReference Include="CodeMechanic.Logging" Version="1.0.3"/>
-    <PackageReference Include="CodeMechanic.Neo4j" Version="1.0.1"/>
+    <PackageReference Include="CodeMechanic.Async" Version="1.0.4" />
+    <PackageReference Include="CodeMechanic.Diagnostics" Version="*" />
+    <PackageReference Include="CodeMechanic.Embeds" Version="*" />
+    <PackageReference Include="CodeMechanic.FileSystem" Version="2.0.17" />
+    <PackageReference Include="CodeMechanic.Logging" Version="1.0.3" />
+    <PackageReference Include="CodeMechanic.Neo4j" Version="1.0.1" />
 <!--    <PackageReference Include="CodeMechanic.Razorhat" Version="1.0.2"/>-->
-    <PackageReference Include="CodeMechanic.Reflection" Version="*"/>
-    <PackageReference Include="CodeMechanic.RegularExpressions" Version="*"/>
-    <PackageReference Include="CodeMechanic.Shargs" Version="1.0.6"/>
-    <PackageReference Include="CodeMechanic.Types" Version="*"/>
-    <PackageReference Include="Drip.UI" Version="1.0.2"/>
-    <PackageReference Include="Htmx" Version="1.12.0"/>
-    <PackageReference Include="Htmx.TagHelpers" Version="1.12.0"/>
-    <PackageReference Include="Serilog" Version="4.3.1"/>
-    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1"/>
-    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0"/>
+    <PackageReference Include="CodeMechanic.Reflection" Version="*" />
+    <PackageReference Include="CodeMechanic.RegularExpressions" Version="*" />
+    <PackageReference Include="CodeMechanic.Shargs" Version="1.0.6" />
+    <PackageReference Include="CodeMechanic.Types" Version="1.0.20" />
+    <PackageReference Include="Drip.UI" Version="1.0.2" />
+    <PackageReference Include="Htmx" Version="1.12.0" />
+    <PackageReference Include="Htmx.TagHelpers" Version="1.12.0" />
+    <PackageReference Include="Serilog" Version="4.3.1" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
   </ItemGroup>
 
   <!--    watch files -->
   <ItemGroup>
-    <Watch Include="importmap.json"/>
-    <Watch Include="**/*.js"/>
-    <Watch Include="**/*.css"/>
-    <Watch Include="wwwroot/css/*.css"/>
+    <Watch Include="importmap.json" />
+    <Watch Include="**/*.js" />
+    <Watch Include="**/*.css" />
+    <Watch Include="wwwroot/css/*.css" />
   </ItemGroup>
 
 
   <ItemGroup>
-    <Content Include="vendors\**" CopyToOutputDirectory="PreserveNewest"/>
+    <Content Include="vendors\**" CopyToOutputDirectory="PreserveNewest" />
     <!--    <Content Include="wwwroot\**" CopyToOutputDirectory="PreserveNewest" />-->
   </ItemGroup>
 
 
   <ItemGroup>
-    <Folder Include="importmap.json"/>
+    <Folder Include="importmap.json" />
   </ItemGroup>
 
   <Target Name="BuildTailwind" BeforeTargets="BeforeBuild">
