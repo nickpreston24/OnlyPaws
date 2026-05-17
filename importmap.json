@@ -108,7 +108,7 @@
       "cdn": "https://cdn.jsdelivr.net/npm/animejs@4.2.2/dist/bundles/anime.umd.min.js",
       "name": "animejs",
       "defer": false,
-      "enabled": true,
+      "enabled": false,
       "use_cdn": false
     },
     {
@@ -123,7 +123,7 @@
       "cdn": "https://cdn.jsdelivr.net/npm/daisyui@5",
       "name": "daisyui",
       "enabled": false,
-      "use_cdn": true,
+      "use_cdn": false,
       "type": "css"
     }
   ]
