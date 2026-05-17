@@ -38,11 +38,18 @@
     <Watch Include="importmap.json"/>
     <Watch Include="**/*.js"/>
     <Watch Include="**/*.css"/>
+    <Watch Include="wwwroot/css/*.css"/>
   </ItemGroup>
+
 
   <ItemGroup>
-    <Folder Include="wwwroot\vendors\"/>
-    <Folder Include="importmap.json"/>
+    <Content Include="vendors\**\*.*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
-
+  
+  
+  <ItemGroup>
+    <Folder Include="importmap.json"/>
+<!--    <Content Include="wwwroot/css/**/*.css"/>-->
+  </ItemGroup>
+  
 </Project>

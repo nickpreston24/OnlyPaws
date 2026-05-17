@@ -1,0 +1,36 @@
+@model OnlyPaws.Pet
+
+<razorhat-island>
+    <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all w-full max-w-xs mx-auto">
+        <figure class="relative">
+            <img src="@Model.img_url" alt="@Model.name" class="w-full h-64 object-cover"/>
+            @if (Model.matchscore > 0.0)
+            {
+                <div class="absolute top-4 right-4">
+                    <partial name="_MatchScoreBadge" model="Model.matchscore"/>
+                </div>
+            }
+        </figure>
+
+        <div class="card-body p-4">
+            <div class="flex justify-between items-start">
+                <h2 class="card-title text-2xl">@Model.name</h2>
+                <div class="badge badge-accent">@Model.breed</div>
+            </div>
+
+            <p class="text-base-content/70">@Model.age • @Model.location</p>
+
+            @* Personality highlights *@
+            <partial name="_PersonalityTraits" model="Model.traits"/>
+
+            <div class="card-actions justify-end mt-4">
+                <button class="btn btn-primary btn-sm"
+                        hx-get="@Url.Page("/Pets/Details", new { id = Model.id })"
+                        hx-target="#modal-content"
+                        hx-swap="innerHTML">
+                    View Profile & Match
+                </button>
+            </div>
+        </div>
+    </div>
+</razorhat-island>

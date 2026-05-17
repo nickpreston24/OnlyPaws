@@ -116,7 +116,7 @@
       "cdn": "https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4",
       "name": "tailwindcss",
       "enabled": true,
-      "use_cdn": true
+      "use_cdn": false
     },
     {
       "src": "/vendors/daisyui/daisyui@5.css",

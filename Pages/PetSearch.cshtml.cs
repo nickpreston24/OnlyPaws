@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Text;
 using CodeMechanic.Diagnostics;
 using CodeMechanic.Razorhat;
 using CodeMechanic.Shargs;
@@ -156,34 +155,6 @@ public class PetSearch : RazorhatIsland
 public record struct PetsGrid(List<Pet> pets)
 {
     public List<Pet> pets { get; set; } = new();
-}
-
-public record struct Pet(string name, double age)
-{
-    // public string name { get; set; } = string.Empty;
-    //
-    // public double age { get; set; }
-
-    public string img_url { get; set; } = string.Empty;
-    public List<Hooman> original_owners { get; set; } = new();
-    public string? hook => name.NotEmpty() ? $"Click to see {name}'s story!" : $"Click to see their story!";
-    public List<Skill> skills { get; set; } = new();
-    public string story { get; set; } = "lorem ipsum";
-
-    public override string ToString()
-    {
-        string skill_content = new StringBuilder()
-            .AppendEach(skills ?? Enumerable.Empty<Skill>(), s => s.Name, delimiter: ",").ToString();
-
-        string content = $@"
-        name: {name}
-        age: {age}
-        skills: {skill_content}
-        ";
-
-        Console.WriteLine($"{nameof(content)} :>> {content}");
-        return content;
-    }
 }
 
 public record struct Skill
