@@ -4,10 +4,10 @@ using OnlyPaws.Pages;
 
 namespace OnlyPaws;
 
-public record struct Pet(string name, double age)
+public record struct Pet(string name, string age)
 {
     public string name { get; set; } = string.Empty;
-    public double age { get; set; }
+    public string age { get; set; }
 
     public string img_url { get; set; } = string.Empty;
     public List<Hooman> original_owners { get; set; } = new();
@@ -19,6 +19,7 @@ public record struct Pet(string name, double age)
     public string location { get; set; } = string.Empty;
     public string id { get; set; } = string.Empty;
     public string[] traits { get; set; }
+    public string description { get; set; } = string.Empty;
 
     public override string ToString()
     {

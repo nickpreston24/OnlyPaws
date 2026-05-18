@@ -267,7 +267,7 @@ public class PetUploaderService : QueuedService
         return new Pet
         {
             name = record.TryGet<string>("p.name"),
-            age = record.TryGet<double>("p.age"),
+            age = record.TryGet<string>("p.age"),
             img_url = record.TryGet<string>("p.img_url"),
             story = record.TryGet<string>("p.story"),
         };

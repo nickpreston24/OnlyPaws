@@ -38,7 +38,7 @@
     <Watch Include="importmap.json" />
     <Watch Include="**/*.js" />
     <Watch Include="**/*.css" />
-    <Watch Include="wwwroot/css/*.css" />
+<!--    <Watch Include="wwwroot/css/*.css" />-->
   </ItemGroup>
 
 
@@ -55,7 +55,7 @@
   <Target Name="BuildTailwind" BeforeTargets="BeforeBuild">
     <Exec Command="sh buildcss.sh" />
   </Target>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\..\CodeMechanic.Razorhat\CodeMechanic.Razorhat.csproj" />
   </ItemGroup>

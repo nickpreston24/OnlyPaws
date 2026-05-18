@@ -208,13 +208,16 @@ public static class Neo4jRecordExtensions
     // }
     //
 
-    public static T? TryGet<T>(this IRecord r, string key)
+    public static T? TryGet<T>(this IRecord r, string key, bool debug = true)
     {
+        if (debug)
+            Console.WriteLine($"{nameof(key)} :>> {key}");
         if (!r.Keys.Contains(key))
             return default;
 
         var value = r[key];
-
+        if (debug)
+            Console.WriteLine($"{nameof(value)} :>> {value}");
         if (value is null)
             return default;
 
